@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Card Component</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --border: #2a2a2e;
+    --text-primary: #f0ece4;
+    --text-secondary: #8a8681;
+    --accent: #e8c97e;
+    --accent-dim: rgba(232, 201, 126, 0.12);
+    --in-stock: #5fcf80;
+    --low-stock: #f0a05a;
+    --out-stock: #e05c5c;
+    --radius: 18px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 60px;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--accent);
+    font-size: 1.2rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+    width: 100%;
+    max-width: 1040px;
+  }
+
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+                box-shadow 0.35s ease,
+                border-color 0.3s ease;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px var(--accent) inset;
+    border-color: var(--accent);
+  }
+
+  .card-image-wrap {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #1c1c1f;
+  }
+
+  .card-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+    display: block;
+  }
+
+  .product-card:hover .card-image-wrap img {
+    transform: scale(1.06);
+  }
+
+  .badge-category {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(14,14,15,0.78);
+    backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+  }
+
+  .badge-discount {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--accent);
+    color: #0e0e0f;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 5px 10px;
+    border-radius: 50px;
+  }
+
+  .card-body {
+    padding: 22px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.22rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .card-brand {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .card-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .card-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    font-size: 0.82rem;
+    color: var(--border);
+    transition: color 0.2s;
+  }
+
+  .star.filled { color: var(--accent); }
+
+  .rating-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+    gap: 12px;
+  }
+
+  .price-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .price-original {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    text-decoration: line-through;
+  }
+
+  .price-current {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem;
+    color: var(--accent);
+  }
+
+  .stock-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .stock-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite;
+  }
+
+  .stock-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stock-bar-wrap {
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .stock-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  .status-in    { color: var(--in-stock);  }
+  .status-low   { color: var(--low-stock); }
+  .status-out   { color: var(--out-stock); }
+
+  .dot-in   { background: var(--in-stock);  }
+  .dot-low  { background: var(--low-stock); }
+  .dot-out  { background: var(--out-stock); opacity: 0.6; animation: none; }
+
+  .fill-in  { background: var(--in-stock);  }
+  .fill-low { background: var(--low-stock); }
+  .fill-out { background: var(--out-stock); }
+
+  @keyframes pulse-ring {
+    0%,100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+    50%      { box-shadow: 0 0 0 4px transparent; opacity: 0.8; }
+  }
+
+  .btn-add {
+    margin: 0 22px 22px;
+    padding: 13px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,201,126,0.25);
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s, transform 0.15s;
+  }
+
+  .btn-add:hover:not(:disabled) {
+    background: var(--accent);
+    color: #0e0e0f;
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
+
+  .btn-add:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .btn-add:active:not(:disabled) { transform: scale(0.97); }
+
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, #1e1e22, #28282e);
+  }
+</style>
+</head>
+<body>
+
+<p class="page-title">Product Showcase</p>
+<div class="cards-grid" id="cards-container"></div>
+
+<script>
+const products = [
+  {
+    id: 1,
+    name: "Obsidian Field Watch",
+    brand: "Meridian",
+    category: "Watches",
+    description: "Sapphire crystal, 200m water resistance, precision Swiss movement in matte black PVD case.",
+    price: 349,
+    originalPrice: 499,
+    rating: 4.7,
+    reviewCount: 238,
+    stock: 18,
+    maxStock: 50,
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+    emoji: null
+  },
+  {
+    id: 2,
+    name: "Ember Wireless Headphones",
+    brand: "Sonara",
+    category: "Audio",
+    description: "40hr battery, adaptive ANC, plush protein-leather cups crafted for marathon sessions.",
+    price: 189,
+    originalPrice: null,
+    rating: 4.4,
+    reviewCount: 511,
+    stock: 4,
+    maxStock: 60,
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+    emoji: null
+  },
+  {
+    id: 3,
+    name: "Aurora Desk Lamp",
+    brand: "Lumis",
+    category: "Lighting",
+    description: "Tunable 2700–6500K, touch dimmer, minimal aluminum arm with magnetic base.",
+    price: 129,
+    originalPrice: 159,
+    rating: 4.9,
+    reviewCount: 87,
+    stock: 0,
+    maxStock: 40,
+    image: null,
+    emoji: "💡"
+  }
+];
+
+function getStockStatus(stock, maxStock) {
+  if (stock === 0) return { label: "Out of Stock", cls: "out", pct: 0 };
+  const pct = (stock / maxStock) * 100;
+  if (pct <= 15) return { label: `Only ${stock} left`, cls: "low", pct };
+  return { label: "In Stock", cls: "in", pct };
+}
+
+function renderStars(rating) {
+  return [1,2,3,4,5].map(i => {
+    const filled = i <= Math.round(rating);
+    return `<span class="star ${filled ? 'filled' : ''}">★</span>`;
+  }).join('');
+}
+
+function createCard(product) {
+  const { name, brand, category, description, price, originalPrice, rating, reviewCount, stock, maxStock, image, emoji } = product;
+  const status = getStockStatus(stock, maxStock);
+  const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : null;
+
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.setAttribute('role', 'article');
+  card.setAttribute('aria-label', name);
+
+  card.innerHTML = `
+    <div class="card-image-wrap">
+      ${image
+        ? `<img src="${image}" alt="${name}" loading="lazy">`
+        : `<div class="image-placeholder">${emoji}</div>`
+      }
+      <span class="badge-category">${category}</span>
+      ${discount ? `<span class="badge-discount">−${discount}%</span>` : ''}
+    </div>
+
+    <div class="card-body">
+      <div class="card-brand">${brand}</div>
+      <h2 class="card-name">${name}</h2>
+      <p class="card-description">${description}</p>
+      <div class="card-rating">
+        <div class="stars">${renderStars(rating)}</div>
+        <span class="rating-count">${rating} (${reviewCount})</span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="price-group">
+        ${originalPrice ? `<span class="price-original">$${originalPrice}</span>` : ''}
+        <span class="price-current">$${price}</span>
+      </div>
+      <div class="stock-row">
+        <div class="stock-indicator status-${status.cls}">
+          <span class="stock-dot dot-${status.cls}"></span>
+          ${status.label}
+        </div>
+        <div class="stock-bar-wrap">
+          <div class="stock-bar-fill fill-${status.cls}" style="width:${status.pct}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-add" ${stock === 0 ? 'disabled' : ''}>
+      ${stock === 0 ? 'Unavailable' : 'Add to Cart'}
+    </button>
+  `;
+
+  card.querySelector('.btn-add').addEventListener('click', e => {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    btn.textContent = '✓ Added';
+    btn.style.background = 'var(--in-stock)';
+    btn.style.color = '#0e0e0f';
+    btn.style.borderColor = 'var(--in-stock)';
+    setTimeout(() => {
+      btn.textContent = 'Add to Cart';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1800);
+  });
+
+  return card;
+}
+
+const container = document.getElementById('cards-container');
+products.forEach(p => container.appendChild(createCard(p)));
+</script>
+</body>
+</html>
